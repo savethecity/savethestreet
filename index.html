@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <meta http-equiv="X-UA-Compatibel" content="ie=edge">
+  <title>Save the city</title>
+  <link href="css/SaveTheCity.css" type="text/css" rel="stylesheet" />
+  <script src="js/sphere.js"></script>
+</head>
+  <body>
+      <h1>Save the city!</h1>
+        <div class="row">
+            <div class="column">
+            </div>
+            <div class="column">
+                <div class="row text-center panel">
+                        <canvas id="my_canvas" width="300" height="300">
+                            Canvas is not supported by your browser.
+                        </canvas>
+                </div>
+            </div>
+            <div class="column">
+                <h4>Individual</h4>
+                Hand washing frequency -> infection distance thrsh
+                <div class="slidecontainer">
+                    <input type="range" min="100" max="200" value="200" class="slider" id="frequencyHandWashing">
+                </div>
+                Social distancing -> rm of LJ pot
+                <div class="slidecontainer">
+                    <input type="range" min="1" max="100" value="1" class="slider" id="socialDistancing">
+                </div>
+                <h4>Government</h4>
+                Healthcare Investments -> mortality rate
+                <div class="slidecontainer">
+                    <input type="range" min="1" max="100" value="50" class="slider" id="invHealthCare">
+                </div>
+                Economic activity -> temperature
+                <div class="slidecontainer">
+                    <input type="range" min="25" max="100" value="100" class="slider" id="economicActivity">
+                </div>
+            </div>
+        </div> 
+    <script src="js/buildGUI.js"></script>
+  </body>
+</html>
