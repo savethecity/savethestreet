@@ -1,7 +1,7 @@
 const STATUS_INFECTED = 'I';
 const STATUS_RECOVERED = 'R';
 const STATUS_HEALTHY = 'H';
-const MAX_VELOCITY = 10;
+const MAX_VELOCITY = 100;
 
 //
 // Credits to https://github.com/DbxDev/NBodySimulation for a large part of the code.
