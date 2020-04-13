@@ -2,6 +2,15 @@ var freqHandwashingSlider = document.getElementById("frequencyHandWashing");
 var socialDistancingSlider = document.getElementById("socialDistancing");
 var economicActivitySlider = document.getElementById("economicActivity");
 
+const DT = 0.0002;
+const EPSILON = 1e-12;
+var INTERVAL_ID;
+var istep;
+var rm = 0.2;
+var infection_threshold, temperature;
+var count_sick;
+var i, j, epot, etot;
+
 // Function to pause the simulation for ms times at every step.
 // TODO: is this the best way to do it?
 
@@ -217,8 +226,54 @@ function timelineInfected(spheres, p_recovery, p_fatality) {
     }
 }
 
+
+function runDynamics(spheres) {
+        // Getting all the slide values here:
+    // This is where the "physics" (or rather psychology) needs to come in!
+    // How does social distancing affect infection rates?
+    rm = 0.1 + parseInt(socialDistancingSlider.value)/400; // social distancing slider
+    // How does the handwashing frequency affect infection rates?
+    infection_threshold = 1.0/parseInt(freqHandwashingSlider.value)
+    // Economic activity gives the "temperature" of the simulation!.
+    temperature = parseInt(economicActivitySlider.value)
+
+    // propagating spheres based on velocity verlet scheme:
+    propagatePositionsVerlet(spheres, DT)
+    // Now I need the forces on the new positions x(t+dt):
+    epot = calculateForces(spheres, EPSILON, rm, infection_threshold)
+    // propagating velocities based on old velocities&forces and new forces:
+    propagateVelocitiesVerlet(spheres, DT)
+    // get the kinetic energy from v(t+dt)
+    ekin = getKineticEnergy(spheres)
+
+    // applying the thermostat which is parametrized by the economic activity slider:
+    //~ if ( (istep % 10) == 0 ){
+    // Thermostats needs to be apply every now and then
+    applyThermostat(spheres, ekin, temperature)
+
+    // etot(t+dt) = ekin(t+dt) + epot(t+dt)
+    etot = (ekin+epot)
+    console.log(istep+': '+ etot + ' ' + ekin + '   '+epot+'   ' +rm)
+    timelineInfected(spheres, 0.001, 0.01)
+    clearCanvas()
+    drawSpheres(spheres)
+    istep++;
+    if ((istep % 10) == 0) {
+        console.log('Checking number of sick')
+        count_sick = 0;
+        for (var i=0; i<spheres.length; i++){
+            if (spheres[i].status ==  STATUS_INFECTED) count_sick++;
+        }
+        console.log(count_sick+' sick individuals')
+        if (count_sick == 0) {
+            console.log('Stopping simulation, no more infected')
+            clearInterval(INTERVAL_ID)
+        }
+    }
+
+}
 var STATIC_VALUES = null;
-window.onload = async function()
+window.onload = function()
 {
     var canvas = document.getElementById('my_canvas');
         if(!canvas) {
@@ -230,12 +285,6 @@ window.onload = async function()
             alert("Canvas context not found.");
             return;
         }
-    var epsilon = 1e-13;
-    var rm = 0.2;
-    var infection_threshold, temperature;
-    var count_sick;
-    const dt = 0.0005;
-    var i, j, epot, etot;
 
     STATIC_VALUES = new StaticValues(canvas);
 
@@ -244,54 +293,9 @@ window.onload = async function()
     drawSpheres(spheres)
 
     // Calculating forces and potential energy in this first step:
-    epot = calculateForces(spheres, epsilon, rm)
+    epot = calculateForces(spheres, EPSILON, rm)
     //~ ekin = getKineticEnergy(spheres)
     //~ etot = (ekin+epot)
     istep = 0;
-    while (true) {
-        // Getting all the slide values here:
-        // This is where the "physics" (or rather psychology) needs to come in!
-        // How does social distancing affect infection rates?
-        rm = 0.1 + parseInt(socialDistancingSlider.value) / 400; // social distancing slider
-        // How does the handwashing frequency affect infection rates?
-        infection_threshold = 1.0 / parseInt(freqHandwashingSlider.value)
-        // Economic activity gives the "temperature" of the simulation!.
-        temperature = parseInt(economicActivitySlider.value)
-
-        // propagating spheres based on velocity verlet scheme:
-        propagatePositionsVerlet(spheres, dt)
-        // Now I need the forces on the new positions x(t+dt):
-        epot = calculateForces(spheres, epsilon, rm, infection_threshold)
-        // propagating velocities based on old velocities&forces and new forces:
-        propagateVelocitiesVerlet(spheres, dt)
-        // get the kinetic energy from v(t+dt)
-        ekin = getKineticEnergy(spheres)
-
-        // applying the thermostat which is parametrized by the economic activity slider:
-        //~ if ( (istep % 10) == 0 ) {
-        // Thermostats needs to be apply every now and then
-        applyThermostat(spheres, ekin, temperature)
-
-        // etot(t+dt) = ekin(t+dt) + epot(t+dt)
-        etot = (ekin + epot)
-        console.log(istep + ': ' +  etot  +  ' '  +  ekin  +  '   ' + epot + '   '  + rm)
-        timelineInfected(spheres, 0.001, 0.01)
-        await sleep(20)
-        clearCanvas()
-        drawSpheres(spheres)
-        istep++;
-        if ((istep % 100) == 0) {
-            console.log('Checking number of sick')
-            count_sick = 0;
-            for (var i = 0; i < spheres.length; i++) {
-                if (spheres[i].status ==  STATUS_INFECTED)  {
-                    count_sick++;
-                }
-            }
-            console.log(count_sick + ' sick individuals')
-            if (count_sick == 0) {
-                break // stopping if there's noone infected.
-            }
-        }
-    }
+    INTERVAL_ID = setInterval(runDynamics, 10, spheres) //.var(istep++)
 }
