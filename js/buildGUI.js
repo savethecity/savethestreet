@@ -156,6 +156,40 @@ function calculateForces(spheres, epsilon, rm, infection_threshold) {
     return ener
 }
 
+function addWorkPlace(spheres) {
+
+    var dist;
+
+    for (i = 0; i < spheres.length; i++) {
+
+        dist = Math.sqrt((spheres[i].x - 0.3) ** 2 + (spheres[i].y - 0.3) ** 2);
+        if (dist < 0.3) {
+            spheres[i].fx -= dist * 100;
+            spheres[i].fy -= dist * 100;
+        }
+
+        dist = Math.sqrt((spheres[i].x - 0.3) ** 2 + (spheres[i].y - 0.7) ** 2);
+        if (dist < 0.3) {
+            spheres[i].fx -= dist * 100;
+            spheres[i].fy -= dist * 100;
+        }
+
+        dist = Math.sqrt((spheres[i].x - 0.7) ** 2 + (spheres[i].y - 0.3) ** 2);
+        if (dist < 0.3) {
+            spheres[i].fx -= dist * 100;
+            spheres[i].fy -= dist * 100;
+        }
+
+        dist = Math.sqrt((spheres[i].x - 0.7) ** 2 + (spheres[i].y - 0.7) ** 2);
+        if (dist < 0.3) {
+            spheres[i].fx -= dist * 100;
+            spheres[i].fy -= dist * 100;
+        }
+
+
+    }
+}
+
 function propagatePositionsVerlet(spheres, dt) {
     var i;
     var sphere;
@@ -172,13 +206,13 @@ function propagateVelocitiesVerlet(spheres, dt) {
         sphere = spheres[i]
         sphere.propagateVelVerlet(dt)
         // Bouncing off the walls is done here:
-        if ( (sphere.x < sphere.radius) && (sphere.vx < 0)) {
+        if ((sphere.x < sphere.radius) && (sphere.vx < 0)) {
             sphere.vx = -sphere.vx
         }
-        else if ( (sphere.x > (1-sphere.radius)) && (sphere.vx > 0)) {
+        else if ((sphere.x > (1-sphere.radius)) && (sphere.vx > 0)) {
             sphere.vx = -sphere.vx
         }
-        if ( (sphere.y < sphere.radius) && (sphere.vy < 0)) {
+        if ((sphere.y < sphere.radius) && (sphere.vy < 0)) {
             sphere.vy = -sphere.vy
         }
         else if ((sphere.y > (1-sphere.radius)) && (sphere.vy> 0)) {
@@ -262,6 +296,9 @@ window.onload = async function()
         propagatePositionsVerlet(spheres, dt)
         // Now I need the forces on the new positions x(t+dt):
         epot = calculateForces(spheres, epsilon, rm, infection_threshold)
+
+        addWorkPlace(spheres)
+
         // propagating velocities based on old velocities&forces and new forces:
         propagateVelocitiesVerlet(spheres, dt)
         // get the kinetic energy from v(t+dt)
