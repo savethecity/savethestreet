@@ -159,7 +159,6 @@ function calculateForces(spheres, epsilon, rm, infection_threshold) {
                     }
                 }
             }
-
         }
     }
     return ener
@@ -245,7 +244,6 @@ function runDynamics(spheres) {
     propagateVelocitiesVerlet(spheres, DT)
     // get the kinetic energy from v(t+dt)
     ekin = getKineticEnergy(spheres)
-
     // applying the thermostat which is parametrized by the economic activity slider:
     //~ if ( (istep % 10) == 0 ){
     // Thermostats needs to be apply every now and then
@@ -276,12 +274,12 @@ var STATIC_VALUES = null;
 window.onload = function()
 {
     var canvas = document.getElementById('my_canvas');
-        if(!canvas) {
+        if (!canvas) {
             alert("Canvas not found.");
             return;
         }
     var context = canvas.getContext('2d');
-        if(!context) {
+        if (!context) {
             alert("Canvas context not found.");
             return;
         }
